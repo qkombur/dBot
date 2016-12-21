@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "discord.js": "^10.0.1",
+    "mysql": "^2.12.0",
     "node-opus": "^0.2.4",
     "opusscript": "0.0.1"
   }

@@ -1,11 +1,12 @@
 "use strict";
 
+const token='MjUzMjk4MTg2MDE2MzkxMTc4.Cx-ojA.OJTTEDCreQqTe6CDH6ymI6OOnRc';
+
 const Discord = require('discord.js');
+const fs = require('fs');
+const mysql = require('mysql')
 
 const bot = new Discord.Client();
-
-
-const token='MjUzMjk4MTg2MDE2MzkxMTc4.Cx-ojA.OJTTEDCreQqTe6CDH6ymI6OOnRc';
 
 bot.on('ready', () => {
   console.log(bot.user.id);
@@ -17,7 +18,7 @@ bot.on('message', message => {
 
   console.log(message.createdAt + " " + message.content + " " + message.channel.name );
 
-  // basic functions
+  // fun example functions
   if (message.content === 'what is my avatar?'){
     message.reply(message.author.avatarURL);
   };
@@ -26,12 +27,18 @@ bot.on('message', message => {
     message.reply(message.author.createdAt);
   };
 
-  // should save message if it has the following format "x is y" and is mentioned
+  // recording toggle, no off switch, because user permissions
+  if (message.content === "start recording"){
+    bot.isRecording = true;
+    message.reply("Ok this chat is being recorded.")
+  };
 
-  if (message.isMentioned(bot.user.id)){
-    message.reply("I'll remember that");
+  if (bot.isRecording){
+    let logMessage = message.createdAt + " - " + message.author + ": " + message.content + '\n';
+    fs.appendFile('log.txt', logMessage, 'utf8', (err) => {
+      if (err) throw err;
+    });
   }
-
 
 });
 
