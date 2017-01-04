@@ -2,7 +2,7 @@
   "name": "dbot",
   "version": "1.0.0",
   "description": "A Discord Bot based on xkcd's IRC bot called \"Bucket\"",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
