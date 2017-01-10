@@ -29,18 +29,7 @@ bot.on('ready', () => {
   }
 
   });
-
-  connection.query('SELECT COUNT(*) AS total FROM facts', function(err, rows, fields){
-    if (err) throw err;
-    else {
-      console.log(rows);
-      const totalFacts = rows[0].total;
-      console.log(totalFacts);
-    }
-  });
-
-
-
+  getTotalFacts();
   console.log('I am Ready!');
 });
 
@@ -83,7 +72,12 @@ bot.on('message', message => {
       // This is a check to make sure the query actually has results.
       console.log(rows)
       if (rows.length > 0){
-        message.channel.sendMessage(rows[0].tidbit);
+        if (rows.length == 1){
+          message.channel.sendMessage(rows[0].tidbit);
+        }
+        else{
+          message.channel.sendMessage(rows[getRandomNumber(0,rows.length)].tidbit);
+        };
       }
       else {
         console.log("No facts");
@@ -93,7 +87,7 @@ bot.on('message', message => {
 
 
 // here begins the random response module
-    if ( 4 > getRandomNumber(1, 16)){
+    if ( 4 > getRandomNumber(1, getTotalFacts() )){
 
       connection.query('SELECT * FROM facts WHERE id like ' + getRandomNumber(1,14), function(err, rows, fields){
         if (err) throw err;
@@ -108,6 +102,19 @@ bot.on('message', message => {
 function getRandomNumber(min, max){
   return Math.floor(Math.random() * (max - min) + min);
 }
+
+function getTotalFacts(){
+  connection.query('SELECT COUNT(*) AS total FROM facts', function(err, rows, fields){
+    if (err) throw err;
+    else {
+      console.log(rows);
+      const totalFacts = rows[0].total;
+      console.log(totalFacts);
+      return totalFacts;
+    }
+  });
+}
+
 
 
 bot.login(token);
