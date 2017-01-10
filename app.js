@@ -6,7 +6,6 @@ const Discord = require('discord.js');
 const fs = require('fs');
 const mysql = require('mysql')
 const config = require('./config');
-const testFunction = require('./app/controllers/test.js');
 
 const token = config.token;
 
@@ -28,7 +27,20 @@ bot.on('ready', () => {
   }else{
     console.log('Database connection successful');
   }
-});
+
+  });
+
+  connection.query('SELECT COUNT(*) AS total FROM facts', function(err, rows, fields){
+    if (err) throw err;
+    else {
+      console.log(rows);
+      const totalFacts = rows[0].total;
+      console.log(totalFacts);
+    }
+  });
+
+
+
   console.log('I am Ready!');
 });
 
@@ -58,25 +70,44 @@ bot.on('message', message => {
       if(err) throw err;
       console.log('Last record insert id:', res.insertId);
       // Tells the user the message was recorded
-      message.reply("Ok");
+      message.channel.sendMessage("Ok");
     });
   };
 
   // Then when a user types in a message that matches the results from the fact column.
   // As currently written, the entire table is queried on each message recieved. Probably not scalable.
-  let queryString = "SELECT * FROM facts WHERE fact LIKE " + "'%" + message.content + "%'";
+  let queryString = "SELECT * FROM facts WHERE fact LIKE ?";
 
-  connection.query(queryString, function(err, rows, fields){
+  connection.query(queryString, message.content, function(err, rows, fields){
     if (err) throw err;
     // This is a check to make sure the query actually has results.
     if (rows.length > 0){
-    message.reply(rows[0].tidbit);
-    } else{
-    console.log("No facts");
+      message.channel.sendMessage(rows[0].tidbit);
+    }
+    else {
+      console.log("No facts");
   }
 });
 
+
+// here begins the random response module
+if ( 10 > getRandomNumber(1, 14)){
+
+  connection.query('SELECT * FROM facts WHERE id like ' + getRandomNumber(1,14), function(err, rows, fields){
+    if (err) throw err;
+    else {
+      message.channel.sendMessage(rows[0].tidbit);
+    }
+  })
+}
+
+
 });
+
+
+function getRandomNumber(min, max){
+  return Math.floor(Math.random() * (max - min) + min);
+}
 
 
 bot.login(token);
