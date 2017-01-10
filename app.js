@@ -47,61 +47,61 @@ bot.on('ready', () => {
 bot.on('message', message => {
 
   console.log(message.content);
-
+  if (message.author.username !== bot.user.username){
   // fun example functions
-  if (message.content === 'what is my avatar?'){
-    message.reply(message.author.avatarURL);
-  };
+    if (message.content === 'what is my avatar?'){
+      message.reply(message.author.avatarURL);
+    };
 
-  if (message.content === 'how old am I?'){
-    message.reply(message.author.createdAt);
-  };
+    if (message.content === 'how old am I?'){
+      message.reply(message.author.createdAt);
+    };
 
-  // Here begins the main logic of the applicaiton,
-  // we take in messages as they come in split them into an x and y then store to the DB
-  if (message.content.split("<reply>").length == 2){
-    let splitMessage = message.content.split("<reply>");
-    let factoid = {
-      fact: splitMessage[0],
-      tidbit: splitMessage[1]
-    }
+    // Here begins the main logic of the applicaiton,
+    // we take in messages as they come in split them into an x and y then store to the DB
+    if (message.content.split("<reply>").length == 2){
+      let splitMessage = message.content.split("<reply>");
+      let factoid = {
+        fact: splitMessage[0],
+        tidbit: splitMessage[1]
+      }
 
-    connection.query('INSERT INTO facts SET ?', factoid, function(err,res){
-      if(err) throw err;
-      console.log('Last record insert id:', res.insertId);
-      // Tells the user the message was recorded
-      message.channel.sendMessage("Ok");
-    });
-  };
+      connection.query('INSERT INTO facts SET ?', factoid, function(err,res){
+        if(err) throw err;
+        console.log('Last record insert id:', res.insertId);
+        // Tells the user the message was recorded
+        message.channel.sendMessage("Ok");
+      });
+    };
 
-  // Then when a user types in a message that matches the results from the fact column.
-  // As currently written, the entire table is queried on each message recieved. Probably not scalable.
-  let queryString = "SELECT * FROM facts WHERE fact LIKE ?";
+    // Then when a user types in a message that matches the results from the fact column.
+    // As currently written, the entire table is queried on each message recieved. Probably not scalable.
 
-  connection.query(queryString, message.content, function(err, rows, fields){
-    if (err) throw err;
-    // This is a check to make sure the query actually has results.
-    if (rows.length > 0){
-      message.channel.sendMessage(rows[0].tidbit);
-    }
-    else {
-      console.log("No facts");
-  }
+    connection.query("SELECT * FROM facts WHERE fact LIKE " + connection.escape('%' + message.content + '%'),
+     function(err, rows, fields){
+      if (err) throw err;
+      // This is a check to make sure the query actually has results.
+      console.log(rows)
+      if (rows.length > 0){
+        message.channel.sendMessage(rows[0].tidbit);
+      }
+      else {
+        console.log("No facts");
+    };
+
 });
 
 
 // here begins the random response module
-if ( 10 > getRandomNumber(1, 14)){
+    if ( 4 > getRandomNumber(1, 16)){
 
-  connection.query('SELECT * FROM facts WHERE id like ' + getRandomNumber(1,14), function(err, rows, fields){
-    if (err) throw err;
-    else {
-      message.channel.sendMessage(rows[0].tidbit);
-    }
-  })
+      connection.query('SELECT * FROM facts WHERE id like ' + getRandomNumber(1,14), function(err, rows, fields){
+        if (err) throw err;
+        else { message.channel.sendMessage(rows[0].tidbit); }
+      });
+    };
+
 }
-
-
 });
 
 
