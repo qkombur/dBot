@@ -89,7 +89,7 @@ bot.on('message', message => {
 // here begins the random response module
     if ( 4 > getRandomNumber(1, getTotalFacts() )){
 
-      connection.query('SELECT * FROM facts WHERE id like ' + getRandomNumber(1,14), function(err, rows, fields){
+      connection.query('SELECT * FROM facts WHERE id like ' + getRandomNumber(1, getTotalFacts() ), function(err, rows, fields){
         if (err) throw err;
         else { message.channel.sendMessage(rows[0].tidbit); }
       });
