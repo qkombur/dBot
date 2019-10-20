@@ -21,6 +21,7 @@ const pool = mysql.createPool({
 
 const totalStoredFacts = getTotalFacts()
 
+let messageStorage = [];
 
 //Waits for ready response from Bot
 bot.on('ready', () => {
@@ -43,13 +44,62 @@ bot.on('message', message => {
   // fun example functions
     
     answerQuestions(message);
+    findFacts(message);
+    lastTwoMessages(message.content);
+    if (remeberThat(message.content) && messageStorage.length === 2) {
+      store(messageStorage, message);
+    }
+    
+    randomResponse()
 
-    storeFacts(message)
+  }
+});
 
-    // Then when a user types in a message that matches the results from the fact column.
-    // As currently written, the entire table is queried on each message recieved. Probably not scalable.
 
-    pool.query("SELECT * FROM facts WHERE fact LIKE " + pool.escape('%' + message.content + '%'),
+function randomResponse() {
+  if ( (totalStoredFacts / 3.1415) > getRandomNumber(1, totalStoredFacts )){
+
+    pool.query('SELECT * FROM facts WHERE id like ' + getRandomNumber(1, getTotalFacts() ), function(err, rows, fields){
+      if (err) throw err;
+      else { message.channel.send(rows[0].tidbit); }
+    });
+  };
+}
+
+
+
+function lastTwoMessages(message) {
+   
+  if ((messageStorage.length >= 2) && message !== 'remember that') {
+    messageStorage.pop();
+  }
+
+  if (message !== 'remember that') {
+    messageStorage.unshift(message);
+  }
+  console.log('last two messages', messageStorage);
+
+}
+
+function store(lastTwoMessages, message) {
+
+    let factoid = {
+      fact: lastTwoMessages[0],
+      tidbit: lastTwoMessages[1]
+    }
+
+    pool.query('INSERT INTO facts SET ?', factoid, function(err,res){
+      if(err) throw err;
+      console.log('Last record insert id:', res.insertId);
+      // Tells the user the message was recorded
+      message.channel.send("I'll remember that.");
+    });
+  
+}
+
+function findFacts(message) {
+
+  pool.query("SELECT * FROM facts WHERE fact LIKE " + pool.escape('%' + message.content + '%'),
      function(err, rows, fields){
       if (err) throw err;
       // This is a check to make sure the query actually has results.
@@ -66,39 +116,14 @@ bot.on('message', message => {
         console.log("No facts");
     };
 
-});
-
-
-// here begins the random response module
-  
-    if ( (totalStoredFacts / 2) > getRandomNumber(1, totalStoredFacts )){
-
-      pool.query('SELECT * FROM facts WHERE id like ' + getRandomNumber(1, getTotalFacts() ), function(err, rows, fields){
-        if (err) throw err;
-        else { message.channel.send(rows[0].tidbit); }
-      });
-    };
-  }
-});
-
-function storeFacts(message) {
-
-  if (message.content.split("<reply>").length == 2){
-    let splitMessage = message.content.split("<reply>");
-    let factoid = {
-      fact: splitMessage[0],
-      tidbit: splitMessage[1]
-    }
-
-    pool.query('INSERT INTO facts SET ?', factoid, function(err,res){
-      if(err) throw err;
-      console.log('Last record insert id:', res.insertId);
-      // Tells the user the message was recorded
-      message.channel.send("Ok");
-    });
-  };
+  });
 }
 
+function remeberThat(message) {
+
+  return message.toLowerCase() === 'remember that';
+
+}
 
 function answerQuestions(message){
 
