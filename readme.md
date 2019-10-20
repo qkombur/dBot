@@ -1,4 +1,4 @@
-# DBot (Real name pending)
+# DBot
 ___
 ***What is this?***
 
@@ -10,12 +10,16 @@ This is a very simple minded chatbot for discord built in node, that is based of
 
 You will want to
 ```
-git pull
+git pull https://github.com/qkombur/dBot.git
 npm install
 
 ```
 
-You will also need to setup a MySQL DB:
+You will also need to setup a MySQL DB
+
+Follow these instructions:
+
+https://dev.mysql.com/doc/mysql-getting-started/en/
 
 
 ```
@@ -46,3 +50,7 @@ config.mysql.database = MySQL DB
 module.exports = config;
 
 ```
+
+Server is kept running with forever.
+
+https://github.com/foreversd/forever.
